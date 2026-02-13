@@ -1,3 +1,12 @@
+//<script>
+//import { useRouter } from 'vue-router';
+//
+//const router = useRouter(); // <- indispensable
+//
+//if(user.status!=false && user.role!="admin"){
+//  router.push('/')
+//}
+//</script>
 <template>
   <div class="admin-layout">
     <aside class="sidebar">

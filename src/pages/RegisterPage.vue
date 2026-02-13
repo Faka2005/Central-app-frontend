@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { reactive, ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import Message from "primevue/message";
+import { Register } from "../utils/auth";
+
+const router = useRouter();
 
 const form = reactive({
   name: "",
@@ -12,44 +16,135 @@ const form = reactive({
 });
 
 const error = ref("");
+const isLoading = ref(false);
 
-// 🔥 équivalent useMemo / derived state
-const isWaiting = computed(() => {
-  return !form.name || !form.email || !form.password;
-});
+const isWaiting = computed(
+  () => !form.name || !form.email || !form.password
+);
 
-
-const submit = () => {
-  if (isWaiting.value) {
-    error.value = "Tous les champs sont obligatoires";
-    return;
-  }
+const submit = async () => {
+  if (isWaiting.value) return;
 
   error.value = "";
-  console.log("Formulaire envoyé :", form);
+  isLoading.value = true;
+
+  try {
+    await Register(form.name, form.email, form.password);
+    
+  } catch (err: any) {
+    error.value = err.message || "Erreur lors de l'inscription";
+  } finally {
+    isLoading.value = false;
+  }
 };
 </script>
 
 <template>
-  <div class="p-4">
-    <h2>Inscription</h2>
+  <div class="auth-page">
+    <div class="auth-card">
+      <h2>Créer un compte</h2>
+      <p class="subtitle">Rejoins Nexhub dès maintenant</p>
 
+      <Message v-if="error" severity="error" class="mb-4">
+        {{ error }}
+      </Message>
 
+      <InputText
+        v-model="form.name"
+        placeholder="Nom d'utilisateur"
+        class="input"
+      />
 
-    <InputText v-model="form.name" placeholder="Nom" class="mb-3 w-full" />
-    <InputText v-model="form.email" placeholder="Email" class="mb-3 w-full" />
-    <Password
-      v-model="form.password"
-      placeholder="Mot de passe"
-      class="mb-3 w-full"
-    />
-    <Message v-if="error" severity="error" class="mb-3">
-      {{ error }}
-    </Message>
-    <Button
-      label="Créer le compte"
-      @click="submit"
-      :disabled="isWaiting"
-    />
+      <InputText
+        v-model="form.email"
+        placeholder="Adresse email"
+        class="input"
+      />
+
+      <Password
+        v-model="form.password"
+        placeholder="Mot de passe"
+        toggleMask
+        class="input"
+      />
+
+      <Button
+        label="Créer le compte"
+        class="btn-primary"
+        :loading="isLoading"
+        :disabled="isWaiting"
+        @click="submit"
+      />
+
+      <p class="switch">
+        Déjà un compte ?
+        <router-link to="/login">Se connecter</router-link>
+      </p>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top, #1e293b, #020617);
+  color: #e5e7eb;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: #020617;
+  padding: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+}
+
+h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.subtitle {
+  text-align: center;
+  color: #94a3b8;
+  margin-bottom: 2.5rem;
+}
+
+.input {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 999px;
+  background: #2563eb;
+  font-weight: 700;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #1e4fd8;
+}
+
+.switch {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.switch a {
+  color: #38bdf8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+</style>
