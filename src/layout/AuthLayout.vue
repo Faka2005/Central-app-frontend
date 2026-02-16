@@ -1,17 +1,18 @@
 <script setup>
-//import { useRouter } from 'vue-router';
-//import { onMounted } from 'vue';
-//
-//// Ici, on récupère l’état de connexion depuis localStorage ou un store
-//const router = useRouter();
-//const user = JSON.parse(localStorage.getItem('user')); // ou depuis un store comme Pinia ou Vuex
-//
-//onMounted(() => {
-//  // si pas connecté → redirige vers la page de login
-//  if (!user || user.status === false) {
-//    router.push({ name: 'Login' });
-//  }
-//});
+import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
+import {getUser} from '../utils/auth.ts'
+// Ici, on récupère l’état de connexion depuis localStorage ou un store
+const router = useRouter();
+const user = getUser(); // ou depuis un store comme Pinia ou Vuex
+
+onMounted(() => {
+
+  // si pas connecté → redirige vers la page de login
+  if (!user || user.role === "") {
+    router.push({ name: 'Login' });
+  }
+});
 
 </script>
 
@@ -31,12 +32,5 @@
 .auth-layout {
   display: flex;
 }
-.sidebar {
-  width: 200px;
-  background: #f3f3f3;
-}
-.content {
-  flex: 1;
-  padding: 20px;
-}
+
 </style>

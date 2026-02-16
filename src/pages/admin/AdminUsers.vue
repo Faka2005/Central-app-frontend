@@ -2,7 +2,7 @@
   <div class="admin-page">
     <h1>Administration des services</h1>
 
-    <!-- Bouton pour ouvrir le Dialog -->
+
 
     <!-- Dialog PrimeVue -->
     <Dialog header="Ajouter un utilisateur" v-model:visible="showAddUser" modal :closable="true" :style="{ width: '400px' }">

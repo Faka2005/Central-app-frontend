@@ -29,6 +29,9 @@
 
 
 <script setup lang="ts">
+import {getUser} from "../utils/auth";
+import { useRouter } from "vue-router";
+
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import ServicesPage from './ServicesPage.vue'
@@ -38,7 +41,8 @@ interface Service {
   link: string;
   etat: boolean;
 }
-
+const router=useRouter();
+if(getUser().id){router.push('/app')}
 const services = ref<Service[]>([]);
 
 onMounted(async () => {

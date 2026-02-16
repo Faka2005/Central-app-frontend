@@ -39,6 +39,7 @@ const routes = [
   // Routes accessibles uniquement si connecté (layout utilisateur)
 {
   path: "/app",
+  name: "App",
   component: AuthLayout, // layout parent pour tout ce qui est connecté
   children: [
     {
@@ -69,6 +70,7 @@ const routes = [
   // Routes admin (layout admin)
   {
     path: "/admin",
+    name: "Admin",
     component: AdminLayout,
     children: [
       {

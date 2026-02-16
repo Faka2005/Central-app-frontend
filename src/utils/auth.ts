@@ -1,7 +1,18 @@
+import {useRouter} from "vue-router";
+// @ts-ignore
+const API_URL = import.meta.env.VITE_API_URL;
 
+const router = useRouter();
+export type User={
+  id: string,
+  username: string,
+  email: string,
+  password: string,
+  role: string,
+}
 export async function Login(email:string, password:string) {
   try {
-    const response = await fetch("http://localhost:3000/auth/login", {
+    const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,7 +46,7 @@ export async function Login(email:string, password:string) {
  */
 export async function Register(username:string, email:string, password:string) {
   try {
-    const response = await fetch("http://localhost:3000/auth/register", {
+    const response = await fetch(`${API_URL}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -59,18 +70,19 @@ export async function Register(username:string, email:string, password:string) {
 /**
  * Déconnecte l'user
  */
-export async function Logout() {
+export default  async function Logout() {
   try {
     // Supprime localStorage
     localStorage.removeItem("token");
     sessionStorage.removeItem("user");
+    router.push("/");
 
-    // Optionnel : tu peux aussi appeler une API `/logout` si besoin
-    console.log("User logged out");
   } catch (error) {
     console.error("Logout error:", error.message);
   }
 }
+
+
 
 export function getUser() {
   const userString = sessionStorage.getItem("user")

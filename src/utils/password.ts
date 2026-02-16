@@ -1,46 +1,88 @@
-import {getUser} from "./auth";
+import { getUser } from "./auth";
 
-export type Password={
-    site:string,
-    email: string,
-    password: string,
-    description:string
-}
+// @ts-ignore
+const API_URL = import.meta.env.VITE_API_URL;
+
+export type Password = {
+    site: string;
+    email: string;
+    password: string;
+    description: string;
+};
 
 /**
- * Ajoute un mot de passe à la base de données
- * @params site -types Password
- * @params email -types Password
- * @params email -types Password
- * @params description -types Password
- *  */
-export async function AddPasword({site, email, password,description}: Password  ) {
-    if(!site||!email || !password||!description){
-        throw new Error("Missing required fields");
+ * Ajouter un mot de passe
+ */
+export async function addPassword(data: Password) {
+    const user = await getUser();
+    const userId = user?.id;
+
+    if (!userId) throw new Error("Utilisateur non connecté");
+
+    const res = await fetch(`${API_URL}/password/${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+    });
+
+    const response = await res.json();
+
+    if (!res.ok) {
+        throw new Error(response.message || "Erreur lors de l'ajout");
     }
-    const user=getUser()
-    const userId=user.id
-    try{
-        const res =await fetch(`http://localhost:3000/password/`, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({userId,site,email,password,description})
-        })
-        const data=await res.json()
-        if(!res.ok){
-            throw new Error(data.message||"Erreur lors de l'ajout du mot de passe")
-        }
-        return {succes:true,data}
-    }catch(err){
-        return err
+
+    return response;
+}
+
+export async function deletePassword(id: string) {
+    if (!id) throw new Error("ID manquant");
+
+    const res = await fetch(`${API_URL}/password/${id}`, {
+        method: "DELETE",
+    });
+
+    const response = await res.json();
+
+    if (!res.ok) {
+        throw new Error(response.message || "Erreur suppression");
     }
+
+    return response;
 }
-export async function DeletePasword(params:String) {
-    
+
+export async function updatePassword(
+    id: string,
+    updatedFields: Partial<Password>
+) {
+    if (!id) throw new Error("ID manquant");
+
+    const res = await fetch(`${API_URL}/password/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedFields),
+    });
+
+    const response = await res.json();
+
+    if (!res.ok) {
+        throw new Error(response.message || "Erreur modification");
+    }
+
+    return response;
 }
-export async function GetAllPasword(params:String) {
-    
-}
-export async function ModifyPasword(params:String) {
-    
+export async function getAllPasswords() {
+    const user = await getUser();
+    const userId = user?.id;
+
+    if (!userId) throw new Error("Utilisateur non connecté");
+
+    const res = await fetch(`${API_URL}/password/user/${userId}`);
+
+    const response = await res.json();
+
+    if (!res.ok) {
+        throw new Error(response.message || "Erreur récupération");
+    }
+
+    return response;
 }

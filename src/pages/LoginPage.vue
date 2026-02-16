@@ -5,7 +5,7 @@ import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import Message from "primevue/message";
-import { Login } from "../utils/auth";
+import { Login} from "../utils/auth";
 
 const router = useRouter();
 
@@ -27,7 +27,8 @@ const submit = async () => {
 
   try {
     await Login(form.email, form.password);
-    router.push("/app");
+
+    router.push("/admin");
   } catch (err: any) {
     error.value = err.message || "Erreur de connexion";
   } finally {

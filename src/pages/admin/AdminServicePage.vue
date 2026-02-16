@@ -1,6 +1,32 @@
 <template>
   <div class="admin-page">
     <h1>Administration des services</h1>
+    <!-- Dialog PrimeVue -->
+    <Dialog header="Ajouter un utilisateur" v-model:visible="showAddService" modal :closable="true" :style="{ width: '400px' }">
+      <div class="p-fluid">
+        <div class="p-field">
+          <label for="name">Name</label>
+          <InputText id="name" v-model="newService.name" />
+        </div>
+        <div class="p-field">
+          <label for="description">Description</label>
+          <InputText id="description" v-model="newService.description" />
+        </div>
+        <div class="p-field">
+          <label for="link">Link</label>
+          <InputText id="link" v-model="newService.link" />
+        </div>
+        <div class="p-field">
+          <label for="etat">État</label>
+          <Dropdown id="etat" v-model="newService.etat" :options="etats" optionLabel="label" optionValue="value"/>
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Annuler" icon="pi pi-times" class="p-button-text" @click="showAddService = false"/>
+        <Button label="Ajouter" icon="pi pi-check" class="p-button-success" @click="addService(    )"/>
+      </template>
+    </Dialog>    <!-- Bouton pour ouvrir le Dialog -->
+    <Button label="Ajouter un utilisateur" icon="pi pi-plus" class="p-button-success mb-3" @click="showAddService = true"/>
 
     <table>
       <thead>
@@ -24,6 +50,10 @@
             <button class="btn" @click="toggleService(service)" :class="service.etat ? 'danger' : 'success'">
               {{ service.etat ? "Désactiver" : "Activer" }}
             </button>
+            <button class="btn danger" @click="deleteService(service)">
+              Supprimer
+            </button>
+
           </td>
         </tr>
       </tbody>
@@ -35,18 +65,29 @@
 </template>
 
 <script setup lang="ts">
+
+
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import Dialog from "primevue/dialog";
+import Dropdown from "primevue/dropdown";
+import InputText from "primevue/inputtext";
+import Button from "primevue/button";
 
 interface Service {
+  id:string;
   name: string;
   description: string;
   link: string;
   etat: boolean;
 }
-
+const etats = [
+  { label: 'En développement', value: false },
+  { label: 'Actif', value: true }
+]
 const services = ref<Service[]>([]);
-
+const showAddService = ref(false)
+const newService = ref({ name: '', description: '', link:'',etat: false })
 onMounted(async () => {
   const res = await axios.get("http://localhost:3000/services");
   services.value = res.data;
@@ -54,8 +95,74 @@ onMounted(async () => {
 
 const toggleService = async (service: Service) => {
   service.etat = !service.etat;
-  await axios.put(`http://localhost:3000/services/admin/${service.name}`, { etat: service.etat });
+  await axios.put(`http://localhost:3000/services/${service.id}`, { etat: service.etat });
 };
+
+
+const deleteService = async (service: Service) => {
+  const confirmDelete = confirm(
+      `Supprimer le service "${service.id}" ?`
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    await axios.delete(`http://localhost:3000/services/${service.id}`);
+
+    services.value = services.value.filter(
+        (s) => s.id !== service.id
+    );
+
+  } catch (error) {
+    console.error("Erreur suppression:", error);
+  }
+};
+const addService = async () => {
+  try {
+    const res = await axios.post(`http://localhost:3000/services`, {
+        ...newService.value,
+    });
+
+    services.value.push(res.data.service);
+    newService.value = {
+      name: '',
+      description: '',
+      link: '',
+      etat: false
+    };
+    showAddService.value = false;
+
+  } catch (error: any) {
+    console.error("Erreur d'ajout:", error.response?.data || error);
+  }
+};
+
+
+const modifyService = async (service: Service) => {
+  try {
+    const res = await axios.put(
+        `http://localhost:3000/services/${service.id}`,
+        {
+          name: service.name,
+          description: service.description,
+          link: service.link,
+          etat: service.etat,
+        }
+    );
+
+    const index = services.value.findIndex(
+        (s) => s.id === service.id
+    );
+
+    if (index !== -1) {
+      services.value[index] = res.data.service;
+    }
+
+  } catch (error: any) {
+    console.error("Erreur modification:", error.response?.data || error);
+  }
+};
+
 </script>
 
 <style scoped>

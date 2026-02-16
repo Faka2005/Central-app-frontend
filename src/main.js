@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./routes";
-
+import './style.css';
 import PrimeVue from "primevue/config";
 
 // PrimeVue styles (UNE SEULE FOIS)
