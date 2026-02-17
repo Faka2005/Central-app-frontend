@@ -18,13 +18,14 @@ export interface Reciter {
   basePath: string;
 
 }
-
+// @ts-ignore
+const API_URL = import.meta.env.VITE_API_URL;
 export interface ReciterResponse {
   reciter: Reciter;
 }
 
 export async function GetRecitateur(slug: string): Promise<Reciter> {
-  const response = await fetch(`http://localhost:3000/reciter/${slug}`);
+  const response = await fetch(`${API_URL}/reciter/${slug}`);
 
   if (!response.ok) {
     throw new Error("Erreur API reciter");
