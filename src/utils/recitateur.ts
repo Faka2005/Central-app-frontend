@@ -43,7 +43,7 @@ export interface ReciterResponse {
 }
 
 export async function GetAllRecitateur(): Promise<Reciters[]> {
-  const response = await fetch(`http://localhost:3000/reciter`);
+  const response = await fetch(`${API_URL}/reciter`);
 
   if (!response.ok) {
     throw new Error("Erreur API reciter");
