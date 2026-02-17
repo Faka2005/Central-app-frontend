@@ -28,6 +28,7 @@
             <router-link to="/csv-viewer">📊 CSV Viewer</router-link>
             <router-link to="/gallery">🖼 Galerie</router-link>
             <router-link to="/learning">📚 Apprentissage</router-link>
+            <router-link to="/reciters">🎙️ Récitateurs</router-link>
           </div>
         </div>
 
