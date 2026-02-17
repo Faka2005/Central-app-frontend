@@ -1,130 +1,171 @@
 <template>
-  <div class="page dark">
+  <div class="page">
     <!-- HERO -->
-    <section class="section hero">
-      <div class="container hero-content">
+    <section class="hero">
+      <div class="container">
         <h1>Nexhub</h1>
         <p class="subtitle">
           Votre hub central pour toutes vos applications numériques.
         </p>
 
-        <router-link to="/services" class="btn-primary">
-          Voir tous les services
-        </router-link>
+        <button class="btn-primary" @click="scrollToServices">
+          Voir les services
+        </button>
       </div>
     </section>
 
     <!-- SERVICES -->
-    <section id="services" class="section services">
+    <section id="services" class="services">
       <div class="container">
-          <ServicesPage/>
+        <h2>Nos Services</h2>
+
+        <div v-if="loading">Chargement...</div>
+        <div v-if="error" class="error">{{ error }}</div>
+
+        <div class="cards" v-if="services.length">
+          <div class="card" v-for="service in services" :key="service.name">
+            <h3>{{ service.name }}</h3>
+            <p>{{ service.description }}</p>
+
+            <a
+              v-if="service.etat"
+              :href="service.link"
+              target="_blank"
+              class="btn-secondary"
+            >
+              Accéder
+            </a>
+
+            <span v-else class="btn-secondary disabled">
+              Bientôt disponible
+            </span>
+          </div>
+        </div>
+
+        <div v-if="!loading && !services.length">
+          Aucun service disponible.
+        </div>
       </div>
     </section>
-
-    <!-- FOOTER -->
-
   </div>
 </template>
 
-
-
 <script setup lang="ts">
-import {getUser} from "../utils/auth";
-import { useRouter } from "vue-router";
-
 import { ref, onMounted } from "vue";
 import axios from "axios";
-import ServicesPage from './ServicesPage.vue'
+import { useRouter } from "vue-router";
+import { getUser } from "../utils/auth";
+
 interface Service {
   name: string;
   description: string;
   link: string;
   etat: boolean;
-}
-const router=useRouter();
-if(getUser().id){router.push('/app')}
+}// @ts-ignore
+
+
+const API_URL = import.meta.env.VITE_API_URL;
+const router = useRouter();
+
 const services = ref<Service[]>([]);
+const loading = ref(true);
+const error = ref("");
+
+const user = getUser();
+if (user && user.id) {
+  router.push("/app");
+}
 
 onMounted(async () => {
   try {
-    const res = await axios.get("http://localhost:3000/services");
+    const res = await axios.get(`${API_URL}/services`);
     services.value = res.data;
   } catch (err) {
-    console.error("Erreur lors du chargement des services", err);
+    console.error(err);
+    error.value = "Erreur lors du chargement des services.";
+  } finally {
+    loading.value = false;
   }
 });
 
-const goToServices = () => {
+const scrollToServices = () => {
   const el = document.getElementById("services");
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth" });
-  }
+  if (el) el.scrollIntoView({ behavior: "smooth" });
 };
-
 </script>
 
 <style scoped>
-/* Base */
 .page {
-  font-family: Inter, system-ui, sans-serif;
-  color: #e5e7eb;
+  font-family: Inter, sans-serif;
   background: #0f172a;
-}
-
-/* Sections */
-.section {
-  padding: 5rem 1rem;
+  color: white;
 }
 
 .container {
   max-width: 1100px;
-  margin: 0 auto;
+  margin: auto;
+  padding: 2rem;
 }
 
-/* Hero */
 .hero {
   text-align: center;
+  padding: 6rem 1rem;
   background: linear-gradient(135deg, #1e293b, #334155);
-  color: #f1f5f9;
 }
 
 .hero h1 {
   font-size: 3rem;
   font-weight: 800;
-  margin-bottom: 1rem;
 }
 
 .subtitle {
-  font-size: 1.2rem;
-  opacity: 0.85;
+  margin-top: 1rem;
+  opacity: 0.8;
 }
 
-/* Buttons */
 .btn-primary {
-  display: inline-block;
   margin-top: 2rem;
-  padding: 0.9rem 1.8rem;
+  padding: 0.8rem 1.5rem;
   background: #2563eb;
+  border: none;
+  border-radius: 999px;
   color: white;
   font-weight: 700;
-  border-radius: 999px;
-  text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+.services {
+  padding: 4rem 1rem;
+  background: #1e293b;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.card {
+  background: #334155;
+  padding: 2rem;
+  border-radius: 16px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  background: #475569;
 }
 
 .btn-secondary {
   display: inline-block;
-  margin-top: 1.2rem;
-  padding: 0.55rem 1.1rem;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
   background: #1db954;
-  color: white;
-  font-weight: 600;
   border-radius: 999px;
+  color: white;
   text-decoration: none;
 }
 
@@ -133,62 +174,8 @@ const goToServices = () => {
   cursor: not-allowed;
 }
 
-/* Services section */
-.services {
-  background: #1e293b;
+.error {
+  color: #f87171;
+  margin-top: 1rem;
 }
-
-.section-header {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.section-header h2 {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #f1f5f9;
-}
-
-.section-header p {
-  color: #cbd5e1;
-}
-
-/* Cards */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
-}
-
-.card {
-  background: #334155;
-  padding: 2rem;
-  border-radius: 16px;
-  text-align: center;
-  transition: transform 0.25s, box-shadow 0.25s, background 0.25s;
-}
-
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px rgba(37, 99, 235, 0.4);
-  background: #475569;
-}
-
-.card h3 {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 0.6rem;
-}
-
-.card p {
-  color: #cbd5e1;
-  font-size: 0.95rem;
-}
-
-
-html {
-  scroll-behavior: smooth;
-}
-
 </style>
-

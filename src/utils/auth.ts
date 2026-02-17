@@ -31,7 +31,7 @@ export async function Login(email:string, password:string) {
 
     return data.user;
   } catch (error) {
-    console.error("Login error:", error.message);
+    console.error("Login error:", error);
     throw error;
   }
 }
@@ -61,7 +61,7 @@ export async function Register(username:string, email:string, password:string) {
     }
     return await Login(email, password);
   } catch (error) {
-    console.error("Register error:", error.message);
+    console.error("Register error:", error);
     throw error;
   }
 }
@@ -78,7 +78,7 @@ export default  async function Logout() {
     router.push("/");
 
   } catch (error) {
-    console.error("Logout error:", error.message);
+    console.error("Logout error:", error);
   }
 }
 
