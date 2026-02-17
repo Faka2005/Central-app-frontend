@@ -44,11 +44,11 @@ interface Service {
   link: string;
   etat: boolean;
 }
-
+const API_URL = import.meta.env.VITE_API_URL;
 const services = ref<Service[]>([]);
 
 onMounted(async () => {
-  const res = await axios.get("http://localhost:3000/services");
+  const res = await axios.get(`${API_URL}/services`);
   services.value = res.data;
 });
 </script>

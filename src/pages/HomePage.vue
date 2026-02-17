@@ -47,7 +47,7 @@ const services = ref<Service[]>([]);
 
 onMounted(async () => {
   try {
-    const res = await axios.get("http://localhost:3000/services");
+    const res = await axios.get(`${API_URL}/services`);
     services.value = res.data;
   } catch (err) {
     console.error("Erreur lors du chargement des services", err);
