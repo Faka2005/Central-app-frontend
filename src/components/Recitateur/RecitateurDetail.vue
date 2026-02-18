@@ -4,6 +4,8 @@ import { useRoute } from "vue-router";
 import { GetRecitateur, type Reciter, type Surah } from "../../utils/recitateur";
 
 const route = useRoute();
+  // @ts-ignore
+const API_URL = import.meta.env.VITE_API_URL;
 
 // --------------------
 // État
@@ -22,7 +24,7 @@ const audioRef = ref<HTMLAudioElement | null>(null);
 const currentSurah = computed(() => surahs.value[currentIndex.value] || null);
 const currentAudioSrc = computed(() => {
   if (!reciter.value || !currentSurah.value) return "";
-  return `http://localhost:3000/reciters/${reciter.value.slug.toLowerCase()}/${currentSurah.value.audioFile}`;
+  return `${API_URL}/reciters/${reciter.value.slug.toLowerCase()}/${currentSurah.value.audioFile}`;
 });
 
 // --------------------
