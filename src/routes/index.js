@@ -56,7 +56,11 @@ const routes = [
     component: AuthLayout,
     meta: { requiresAuth: true },
     children: [
-      { path: "", name: "Dashboard", component: DashboardPage },
+      {
+        path: "",
+        name: "Dashboard",
+        component: DashboardPage,
+      },
     ],
   },
 
@@ -68,9 +72,21 @@ const routes = [
     component: AdminLayout,
     meta: { requiresAuth: true, requiresAdmin: true },
     children: [
-      { path: "", name: "AdminDashboard", component: AdminDashboard },
-      { path: "services", name: "AdminServices", component: AdminServicePage },
-      { path: "users", name: "AdminUsers", component: AdminUsers },
+      {
+        path: "",
+        name: "AdminDashboard",
+        component: AdminDashboard,
+      },
+      {
+        path: "services",
+        name: "AdminServices",
+        component: AdminServicePage,
+      },
+      {
+        path: "users",
+        name: "AdminUsers",
+        component: AdminUsers,
+      },
     ],
   },
 
