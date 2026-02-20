@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router';
 import { onMounted } from 'vue';
 import {getUser} from '../utils/auth.ts'
+import Sidebar from '../components/Sidebar.vue';
 // Ici, on récupère l’état de connexion depuis localStorage ou un store
 const router = useRouter();
 const user = getUser(); // ou depuis un store comme Pinia ou Vuex
@@ -18,9 +19,7 @@ onMounted(() => {
 
 <template>
   <div class="auth-layout">
-    <aside class="sidebar">
-      <!-- menu pour utilisateur connecté -->
-    </aside>
+    <Sidebar /> <!-- barre latérale commune à toutes les pages protégées -->
 
     <main class="content">
       <RouterView /> <!-- ici s’affiche chaque page enfant -->
