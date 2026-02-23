@@ -1,35 +1,42 @@
-<script setup>
-import { useRouter } from 'vue-router';
-import { onMounted } from 'vue';
-import {getUser} from '../utils/auth.ts'
-import Sidebar from '../components/Sidebar.vue';
-// Ici, on récupère l’état de connexion depuis localStorage ou un store
-const router = useRouter();
-const user = getUser(); // ou depuis un store comme Pinia ou Vuex
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { onMounted } from 'vue'
+import { getUser } from '../utils/auth'
+import NavbarAuth from '../components/NavbarAuth.vue'
+
+const router = useRouter()
+const user = getUser()
 
 onMounted(() => {
-
-  // si pas connecté → redirige vers la page de login
   if (!user || user.role === "") {
-    router.push({ name: 'Login' });
+    router.push({ name: 'Login' })
   }
-});
-
+})
 </script>
 
 <template>
   <div class="auth-layout">
-    <Sidebar /> <!-- barre latérale commune à toutes les pages protégées -->
+    <NavbarAuth />
 
-    <main class="content">
-      <RouterView /> <!-- ici s’affiche chaque page enfant -->
-    </main>
+    <div class="page-container">
+      <RouterView />
+    </div>
   </div>
 </template>
 
-<style>
+<style scoped>
 .auth-layout {
   display: flex;
+  flex-direction: column;   /* IMPORTANT : vertical */
+  height: 100vh;
+  width: 100%;
 }
 
+/* CONTENU SOUS NAVBAR */
+.page-container {
+  flex: 1;
+  overflow-y: auto;
+  background: #f8fafc;
+  padding: 2rem;
+}
 </style>

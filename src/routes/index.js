@@ -54,13 +54,22 @@ const routes = [
   {
     path: "/app",
     component: AuthLayout,
-    meta: { requiresAuth: true },
+    //meta: { requiresAuth: true },
     children: [
       {
         path: "",
         name: "Dashboard",
         component: DashboardPage,
       },
+        { path: '/dashboard', component: () => import('../pages/DashboardPage.vue') },
+      //{ path: '/analyse-csv', component: () => import('../views/AnalyseCSV.vue') },
+      //{ path: '/gallerie', component: () => import('../views/Gallerie.vue') },
+            { path: "password", name: "PasswordPage", component: () => import("../components/PasswordPage.vue") },
+
+      //{ path: '/cours', component: () => import('../views/Cours.vue') },
+      //{ path: '/sourates', component: () => import('../views/Sourates.vue') },
+      //{ path: '/messages', component: () => import('../views/Messages.vue') },
+      //{ path: '/amis', component: () => import('../views/Amis.vue') }
     ],
   },
 
