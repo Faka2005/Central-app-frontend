@@ -7,11 +7,11 @@ import NavbarAuth from '../components/NavbarAuth.vue'
 const router = useRouter()
 const user = getUser()
 
-onMounted(() => {
-  if (!user || user.role === "") {
-    router.push({ name: 'Login' })
-  }
-})
+//onMounted(() => {
+//  if (!user || user.role === "") {
+//    router.push({ name: 'Login' })
+//  }
+//})
 </script>
 
 <template>

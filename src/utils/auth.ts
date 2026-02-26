@@ -1,16 +1,17 @@
-import {useRouter} from "vue-router";
-// @ts-ignore
-const API_URL = import.meta.env.VITE_API_URL;
+  import {useRouter} from "vue-router";
+  // @ts-ignore
+  const API_URL = import.meta.env.VITE_API_URL;
 
-const router = useRouter();
-export type User={
-  id: string,
-  username: string,
-  email: string,
-  password: string,
-  role: string,
-}
-export async function Login(email:string, password:string) {
+  const router = useRouter();
+  export type User={
+    id: string,
+    username: string,
+    email: string,
+    password: string,
+    role: string,
+  }
+ export async function Login(email: string, password: string) {
+  console.log("API URL =", API_URL);
   try {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: "POST",
@@ -20,7 +21,13 @@ export async function Login(email:string, password:string) {
       body: JSON.stringify({ email, password }),
     });
 
-    const data = await response.json();
+    const text = await response.text();
+
+    if (!text) {
+      throw new Error("Empty response from server");
+    }
+
+    const data = JSON.parse(text);
 
     if (!response.ok) {
       throw new Error(data.error || "Login failed");
@@ -30,6 +37,7 @@ export async function Login(email:string, password:string) {
     sessionStorage.setItem("user", JSON.stringify(data.user));
 
     return data.user;
+
   } catch (error) {
     console.error("Login error:", error);
     throw error;
@@ -37,55 +45,55 @@ export async function Login(email:string, password:string) {
 }
 
 
-/**
- * Enregistre l'utilsateur 
- * @params username
- * @params email
- * @params password 
- * 
- */
-export async function Register(username:string, email:string, password:string) {
-  try {
-    const response = await fetch(`${API_URL}/auth/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, email, password }),
-    });
+  /**
+   * Enregistre l'utilsateur 
+   * @params username
+   * @params email
+   * @params password 
+   * 
+   */
+  export async function Register(username:string, email:string, password:string) {
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || "Registration failed");
+      if (!response.ok) {
+        throw new Error(data.error || "Registration failed");
+      }
+      return await Login(email, password);
+    } catch (error) {
+      console.error("Register error:", error);
+      throw error;
     }
-    return await Login(email, password);
-  } catch (error) {
-    console.error("Register error:", error);
-    throw error;
   }
-}
 
 
-/**
- * Déconnecte l'user
- */
-export default  async function Logout() {
-  try {
-    // Supprime localStorage
-    localStorage.removeItem("token");
-    sessionStorage.removeItem("user");
-    router.push("/");
+  /**
+   * Déconnecte l'user
+   */
+  export default  async function Logout() {
+    try {
+      // Supprime localStorage
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("user");
+      router.push("/");
 
-  } catch (error) {
-    console.error("Logout error:", error);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   }
-}
 
 
 
-export function getUser() {
-  const userString = sessionStorage.getItem("user")
-  if (!userString) return null
-  return JSON.parse(userString) 
-}
+  export function getUser() {
+    const userString = sessionStorage.getItem("user")
+    if (!userString) return null
+    return JSON.parse(userString) 
+  }

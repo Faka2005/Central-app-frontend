@@ -18,7 +18,7 @@ import RecitateurDetail from "../components/Recitateur/RecitateurDetail.vue";
 
 // User
 import DashboardPage from "../pages/DashboardPage.vue";
-
+import PasswordPage from "../components/PasswordPage.vue";
 // Admin
 import AdminDashboard from "../pages/admin/AdminDashboard.vue";
 import AdminServicePage from "../pages/admin/AdminServicePage.vue";
@@ -44,7 +44,7 @@ const routes = [
       { path: "login", name: "Login", component: LoginPage },
       { path: "register", name: "Register", component: RegisterPage },
       { path: "service-unavailable", name: "ServiceUnavailable", component: ServiceUnavailable },
-      { path: "password", name: "PasswordPage", component: () => import("../components/PasswordPage.vue") },
+      { path: "password", name: "PasswordPage", component: PasswordPage },
     ],
   },
 
@@ -61,14 +61,20 @@ const routes = [
         name: "Dashboard",
         component: DashboardPage,
       },
-        { path: '/dashboard', component: () => import('../pages/DashboardPage.vue') },
       //{ path: '/analyse-csv', component: () => import('../views/AnalyseCSV.vue') },
       //{ path: '/gallerie', component: () => import('../views/Gallerie.vue') },
-            { path: "password", name: "PasswordPage", component: () => import("../components/PasswordPage.vue") },
+      { path: "password", name: "PasswordPage", component: PasswordPage },
+      { path: "reciters", name: "Reciters", component: Recitateur },
+      {
+        path: "reciters/:name",
+        name: "ReciterDetail",
+        component: RecitateurDetail,
+        props: true,
+      },
 
       //{ path: '/cours', component: () => import('../views/Cours.vue') },
       //{ path: '/sourates', component: () => import('../views/Sourates.vue') },
-      //{ path: '/messages', component: () => import('../views/Messages.vue') },
+    
       //{ path: '/amis', component: () => import('../views/Amis.vue') }
     ],
   },
@@ -96,6 +102,11 @@ const routes = [
         name: "AdminUsers",
         component: AdminUsers,
       },
+      //{
+      //  path: "signalement-users",
+      //  name: "SignalementUsers",
+      //   component: SignalementUsers,
+      //},
     ],
   },
 

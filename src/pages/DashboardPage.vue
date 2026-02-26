@@ -1,8 +1,7 @@
 <template>
-  <div class="layout">
+  
 
-    <!-- MAIN -->
-    <div class="main">
+
 
       <!-- TOPBAR -->
       <div class="topbar">
@@ -15,20 +14,13 @@
           icon="pi pi-sign-out"
           @click="Logout"
           class="logout-btn"
+          label="Déconnexion"
         />
       </div>
 
       <!-- FEATURES -->
       <div class="features-grid">
 
-        <div class="feature-card">
-          <div class="icon-box blue">
-            <i class="pi pi-chart-line"></i>
-          </div>
-          <h3>Analyse CSV</h3>
-          <p>Importez et visualisez vos fichiers CSV avec graphiques dynamiques.</p>
-          <Button label="Analyser" class="p-button-sm action-btn" />
-        </div>
 
         <div class="feature-card">
           <div class="icon-box purple">
@@ -48,24 +40,9 @@
           <Button label="Accéder" class="p-button-sm action-btn" />
         </div>
 
-        <div class="feature-card">
-          <div class="icon-box green">
-            <i class="pi pi-book"></i>
-          </div>
-          <h3>Cours & Progression</h3>
-          <p>Suivez votre avancement global.</p>
-          <ProgressBar :value="progress" />
-          <small class="progress-text">{{ progress }}% complété</small>
-        </div>
+       
 
-        <div class="feature-card">
-          <div class="icon-box orange">
-            <i class="pi pi-headphones"></i>
-          </div>
-          <h3>Sourates</h3>
-          <p>Écoutez vos sourates préférées à tout moment.</p>
-          <Button label="Écouter" class="p-button-sm p-button-success" />
-        </div>
+    
 
         <div class="feature-card">
           <div class="icon-box indigo">
@@ -78,29 +55,25 @@
 
       </div>
 
-    </div>
-  </div>
+    
+  
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import Button from "primevue/button";
 import ProgressBar from "primevue/progressbar";
-import Logout from "../utils/auth";
+import Logout,{ getUser } from "../utils/auth";
 
 const user = ref({
-  username: "Yassar"
+  username: getUser()?.username || "Utilisateur"
 });
 
 const progress = ref(65);
 </script>
 
 <style scoped>
-.layout {
-  display: flex;
-  height: 100vh;
-  width: 100vw;
-}
+
 
 /* MAIN */
 .main {

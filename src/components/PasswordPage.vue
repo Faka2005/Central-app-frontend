@@ -1,272 +1,285 @@
 <template>
-  <div class="admin-page">
-    <h1>Administration des services</h1>
+  <h1>Gestion des mots de passe</h1>
 
+  <p class="count">
+    {{ filteredPasswords.length }} mot{{ filteredPasswords.length > 1 ? "s" : "" }}
+    enregistré{{ filteredPasswords.length > 1 ? "s" : "" }}
+  </p>
 
-<Dialog
-  header="Ajouter un mot de passe"
-  v-model:visible="showAddDialog"
-  modal
-  :style="{ width: '400px' }"
->
-  <div class="p-fluid">
-    <div class="p-field">
-      <label>Site</label>
-      <InputText v-model="newPassword.site" />
-    </div>
-
-    <div class="p-field">
-      <label>Email</label>
-      <InputText v-model="newPassword.email" />
-    </div>
-
-    <div class="p-field">
-      <label>Password</label>
-      <InputText v-model="newPassword.password" />
-    </div>
-
-    <div class="p-field">
-      <label>Description</label>
-      <InputText v-model="newPassword.description" />
-    </div>
+  <!-- 🔍 Barre recherche -->
+  <div class="search-bar">
+    <InputText v-model="searchQuery" placeholder="Rechercher par site ou email..." class="w-full" />
   </div>
 
-  <template #footer>
-    <Button label="Annuler" @click="showAddDialog = false" />
-    <Button label="Ajouter" class="p-button-success" @click="AddPassword()" />
-  </template>
-</Dialog>
+  <div class="actions-bar">
+    <Button label="Exporter CSV" icon="pi pi-download" class="p-button-success" @click="exportCSV" />
 
-<Button
-  label="Ajouter un mot de passe"
-  icon="pi pi-plus"
-  class="p-button-success mb-3"
-  @click="showAddDialog = true"
-/>
+    <FileUpload mode="basic" accept=".csv" chooseLabel="Importer CSV" customUpload auto @uploader="importCSV"
+      class="p-button-secondary" />
 
-
-  <table>
-  <thead>
-    <tr>
-      <th>Site</th>
-      <th>Email</th>
-      <th>Password</th>
-      <th>Description</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <tr v-for="p in passwords" :key="p.id">
-      <td>
-        <InputText v-model="p.site" />
-      </td>
-      <td>
-        <InputText v-model="p.email" />
-      </td>
-      <td>
-        <InputText v-model="p.password" />
-      </td>
-      <td>
-        <InputText v-model="p.description" />
-      </td>
-      <td>
-        <Button
-          label="Save"
-          class="p-button-success mr-2"
-          @click="UpdatePassword(p.id)"
-        />
-        <Button
-          label="Delete"
-          class="p-button-danger"
-          @click="DeletePassword(p.id)"
-        />
-      </td>
-    </tr>
-  </tbody>
-</table>
-
+    <Button label="Ajouter" icon="pi pi-plus" class="p-button-success" @click="showAddDialog = true" />
   </div>
 
+  <!-- TABLE -->
+  <DataTable :value="filteredPasswords" dataKey="id" :loading="loading" paginator :rows="5" stripedRows
+    responsiveLayout="scroll">
+    <Column field="site" header="Site" sortable />
+    <Column field="email" header="Email" sortable />
 
+    <Column header="Password">
+      <template #body="{ data }">
+        <div class="password-cell">
+          <InputText :type="isVisible(data.id) ? 'text' : 'password'" :modelValue="data.password" readonly />
+          <Button :icon="isVisible(data.id) ? 'pi pi-eye-slash' : 'pi pi-eye'" class="p-button-text"
+            @click="toggleVisibility(data.id)" />
+          <Button icon="pi pi-copy" class="p-button-text" @click="copyPassword(data.password)" />
+        </div>
+      </template>
+    </Column>
 
+    <Column field="description" header="Description" />
+
+    <Column header="Actions">
+      <template #body="{ data }">
+        <Button icon="pi pi-trash" class="p-button-danger p-button-text" @click="confirmDelete(data)" />
+      </template>
+    </Column>
+  </DataTable>
+
+  <!-- ⚠️ Dialog confirmation suppression -->
+  <Dialog header="Confirmer la suppression" v-model:visible="showDeleteDialog" modal :style="{ width: '350px' }">
+    <p>
+      Êtes-vous sûr de vouloir supprimer
+      <strong>{{ passwordToDelete?.site }}</strong> ?
+    </p>
+
+    <template #footer>
+      <Button label="Annuler" @click="showDeleteDialog = false" />
+      <Button label="Supprimer" class="p-button-danger" @click="deleteConfirmed" />
+    </template>
+  </Dialog>
+
+  <Dialog header="Ajouter un mot de passe" v-model:visible="showAddDialog" modal :style="{ width: '400px' }" >
+     <div class="p-fluid"> <div class="p-field">
+       <label>Site</label>
+        <InputText v-model="newPassword.site" />
+         </div> <div class="p-field">
+           <label>Email</label>
+            <InputText v-model="newPassword.email" />
+             </div> <div class="p-field"> 
+              <label>Password</label>
+               <div class="password-field"> 
+                <InputText v-model="newPassword.password" />
+                 <Button label="Générer" class="p-button-secondary" @click="generatePassword()" />
+                  </div> </div> <div class="p-field"> <label>Description</label> <InputText v-model="newPassword.description" /> </div> </div> <template #footer> <Button label="Annuler" @click="showAddDialog = false" /> <Button label="Ajouter" class="p-button-success" @click="AddPassword()" /> </template> </Dialog>
 </template>
-
 <script setup lang="ts">
-import { ref, onMounted } from "vue"
-import Dialog from "primevue/dialog"
+import { ref, computed, onMounted } from "vue"
+import DataTable from "primevue/datatable"
+import Column from "primevue/column"
 import InputText from "primevue/inputtext"
 import Button from "primevue/button"
+import FileUpload from "primevue/fileupload"
+import Dialog from "primevue/dialog"
 
 import {
-  getAllPasswords,
   addPassword,
+  getAllPasswords,
   deletePassword,
-  updatePassword,
   type Password
 } from "../utils/password"
 
 const passwords = ref<(Password & { id: string })[]>([])
+const loading = ref(true)
 const showAddDialog = ref(false)
+const searchQuery = ref("")
+const visiblePasswords = ref<string[]>([])
 
-const newPassword = ref<Password>({
-  site: "",
-  email: "",
-  password: "",
-  description: ""
-})
+const showDeleteDialog = ref(false)
+const passwordToDelete = ref<(Password & { id: string }) | null>(null)
 
-onMounted(async () => {
-  await loadPasswords()
-})
+onMounted(loadPasswords)
 
+const newPassword = ref<Password>({ site: "", email: "", password: "", description: "" }) 
 async function loadPasswords() {
+  loading.value = true
   try {
-    const res = await getAllPasswords()
-    passwords.value = res
-  } catch (err) {
-    console.error("Erreur chargement :", err)
+    passwords.value = await getAllPasswords()
+    visiblePasswords.value = []
+  } finally {
+    loading.value = false
   }
 }
 
+function generatePassword(length = 16) {
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+{}[]<>?";
+  
+  const array = new Uint32Array(length);
+  crypto.getRandomValues(array);
+
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars[array[i] % chars.length];
+  }
+
+  newPassword.value.password = result;
+}
+
 async function AddPassword() {
+  if (!newPassword.value.site || !newPassword.value.email || !newPassword.value.password) {
+    alert("Champs obligatoires manquants");
+    return;
+  }
+
   try {
-    const res = await addPassword(newPassword.value)
-    passwords.value.push(res)
+    const res = await addPassword(newPassword.value);
+
+    passwords.value.push(res);
+
     newPassword.value = {
       site: "",
       email: "",
       password: "",
       description: ""
+    };
+
+    showAddDialog.value = false;
+
+  } catch (err) {
+    console.error("Erreur ajout :", err);
+    alert("Erreur lors de l'ajout");
+  }
+}
+const filteredPasswords = computed(() => {
+  if (!searchQuery.value) return passwords.value
+
+  return passwords.value.filter(p =>
+    p.site.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    p.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+  )
+})
+
+function toggleVisibility(id: string) {
+  if (visiblePasswords.value.includes(id)) {
+    visiblePasswords.value = visiblePasswords.value.filter(v => v !== id)
+  } else {
+    visiblePasswords.value.push(id)
+    setTimeout(() => {
+      visiblePasswords.value = visiblePasswords.value.filter(v => v !== id)
+    }, 5000)
+  }
+}
+
+function isVisible(id: string) {
+  return visiblePasswords.value.includes(id)
+}
+
+async function copyPassword(password: string) {
+  try {
+    await navigator.clipboard.writeText(password)
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+/* 🔥 Confirmation suppression */
+function confirmDelete(password: Password & { id: string }) {
+  passwordToDelete.value = password
+  showDeleteDialog.value = true
+}
+
+async function deleteConfirmed() {
+  if (!passwordToDelete.value) return
+
+  await deletePassword(passwordToDelete.value.id)
+  passwords.value = passwords.value.filter(
+    p => p.id !== passwordToDelete.value!.id
+  )
+
+  showDeleteDialog.value = false
+  passwordToDelete.value = null
+}
+
+/* ==============================
+   EXPORT CSV
+============================== */
+function exportCSV() {
+  if (!passwords.value.length) return
+
+  const headers = ["site", "email", "password", "description"]
+
+  const csvRows = [
+    headers.join(","), // ligne des en-têtes
+    ...passwords.value.map(p =>
+      [p.site, p.email, p.password, p.description]
+        .map(value => `"${value?.replace(/"/g, '""')}"`) // échappe les guillemets
+        .join(",")
+    )
+  ]
+
+  const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" })
+  const link = document.createElement("a")
+  link.href = URL.createObjectURL(blob)
+  link.download = "passwords.csv"
+  link.click()
+}
+
+/* ==============================
+   IMPORT CSV
+============================== */
+function importCSV(event: any) {
+  const file = event.files[0]
+  if (!file) return
+
+  const reader = new FileReader()
+
+  reader.onload = async (e: any) => {
+    const text = e.target.result
+    const rows = text.split("\n").slice(1) // ignore header
+
+    for (let row of rows) {
+      if (!row.trim()) continue
+
+      // Découpe et nettoie les guillemets
+      const [site, email, password, description] = row
+        .split(",")
+        .map((v: string) => v.replace(/^"|"$/g, "").replace(/""/g, '"'))
+
+      try {
+        await addPassword({ site, email, password, description })
+      } catch (err) {
+        console.error("Erreur d'importation :", err)
+      }
     }
-    showAddDialog.value = false
-  } catch (err) {
-    console.error("Erreur ajout :", err)
-  }
-}
 
-async function DeletePassword(id: string) {
-  try {
-    await deletePassword(id)
-    passwords.value = passwords.value.filter(p => p.id !== id)
-  } catch (err) {
-    console.error("Erreur suppression :", err)
+    // Recharge la liste après import
+    await loadPasswords()
   }
-}
 
-async function UpdatePassword(id: string) {
-  const password = passwords.value.find(p => p.id === id)
-  if (!password) return
-
-  try {
-    await updatePassword(id, {
-      site: password.site,
-      email: password.email,
-      password: password.password,
-      description: password.description
-    })
-  } catch (err) {
-    console.error("Erreur modification :", err)
-  }
+  reader.readAsText(file)
 }
 </script>
-
-
 <style scoped>
-.admin-page {
-  max-width: 1100px;
-  margin: 3rem auto;
-  padding: 1rem;
-}
-
-.subtitle {
+.count {
+  margin-bottom: 1rem;
+  font-weight: 500;
   color: #64748b;
-  margin-bottom: 2rem;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+.search-bar {
+  margin-bottom: 1rem;
 }
 
-th, td {
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-th {
-  background: #f1f5f9;
-}
-
-.status {
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: bold;
-}
-
-.status.active {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.status.inactive {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.btn {
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.btn.success {
-  background: #22c55e;
-  color: white;
-}
-
-.btn.danger {
-  background: #ef4444;
-  color: white;
-}
-
- .modal-overlay {
-   position: fixed;
-   top: 0;
-   left: 0;
-   width: 100%;
-   height: 100%;
-   background: rgba(0,0,0,0.5);
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   z-index: 1000;
- }
-
-.modal {
-  background: white;
-  padding: 2rem;
-  border-radius: 10px;
-  width: 400px;
-  max-width: 90%;
-}
-
-.modal-actions {
+.password-cell {
   display: flex;
-  justify-content: flex-end;
-  margin-top: 1rem;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-.modal-actions .btn {
-  margin-left: 0.5rem;
+.actions-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
-
-
 </style>

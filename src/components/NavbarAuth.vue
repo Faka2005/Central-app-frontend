@@ -25,10 +25,7 @@
         <span>Coffre</span>
       </router-link>
 
-      <router-link to="/cours" class="nav-item">
-        <i class="pi pi-book"></i>
-        <span>Cours</span>
-      </router-link>
+      
 
       <router-link to="/reciters" class="nav-item">
         <i class="pi pi-headphones"></i>
