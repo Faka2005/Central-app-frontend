@@ -2,11 +2,13 @@
 const API_URL = import.meta.env.VITE_API_URL;
 export async function GetProfileByUser(userId:string){
     try{
-        const response = await fetch(`{API_URL}/users/me/${userId}`, {
+        const response = await fetch(`{API_URL}/users/me`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
+            credentials:"include",
+
         });
         const data = await response.json();
 

@@ -10,39 +10,42 @@
     password: string,
     role: string,
   }
- export async function Login(email: string, password: string) {
-  console.log("API URL =", API_URL);
-  try {
-    const response = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+  export async function Login(email: string, password: string) {
+    console.log("API URL =", API_URL);
 
-    const text = await response.text();
+    try {
+      // 1️⃣ Login
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!text) {
-      throw new Error("Empty response from server");
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      // 2️⃣ Get current user
+      const userResponse = await fetch(`${API_URL}/users/me`, {
+        credentials: "include",
+      });
+
+      if (!userResponse.ok) {
+        throw new Error("Failed to fetch user");
+      }
+
+      const user = await userResponse.json();
+
+      return user;
+
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
     }
-
-    const data = JSON.parse(text);
-
-    if (!response.ok) {
-      throw new Error(data.error || "Login failed");
-    }
-
-    localStorage.setItem("token", data.token);
-    sessionStorage.setItem("user", JSON.stringify(data.user));
-
-    return data.user;
-
-  } catch (error) {
-    console.error("Login error:", error);
-    throw error;
   }
-}
 
 
   /**
@@ -91,7 +94,9 @@
   }
 
 
-
+  /**
+   *Renvoie l'utisateur actuel
+   */
   export function getUser() {
     const userString = sessionStorage.getItem("user")
     if (!userString) return null

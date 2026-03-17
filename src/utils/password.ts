@@ -26,6 +26,7 @@ export async function addPassword(data: Password): Promise<PasswordWithId> {
   const res = await fetch(`${API_URL}/password/${userId}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials:"include",
     body: JSON.stringify(data),
   });
 
@@ -46,7 +47,9 @@ export async function getAllPasswords(): Promise<PasswordWithId[]> {
 
   if (!userId) throw new Error("Utilisateur non connecté");
 
-  const res = await fetch(`${API_URL}/password/user/${userId}`);
+  const res = await fetch(`${API_URL}/password/user/${userId}`,{
+    credentials:"include"
+  });
 
   if (!res.ok) {
     const error = await res.json();
@@ -68,6 +71,7 @@ export async function updatePassword(
   const res = await fetch(`${API_URL}/password/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
+    credentials:"include",
     body: JSON.stringify(updatedFields),
   });
 
@@ -85,6 +89,8 @@ export async function deletePassword(id: string): Promise<void> {
 
   const res = await fetch(`${API_URL}/password/${id}`, {
     method: "DELETE",
+    credentials:"include",
+
   });
 
   if (!res.ok) {
