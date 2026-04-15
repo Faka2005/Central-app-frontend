@@ -5,11 +5,12 @@ import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import Message from "primevue/message";
-import { Login} from "../utils/auth";
+import { Register } from "../../utils/auth";
 
 const router = useRouter();
 
 const form = reactive({
+  name: "",
   email: "",
   password: "",
 });
@@ -17,7 +18,9 @@ const form = reactive({
 const error = ref("");
 const isLoading = ref(false);
 
-const isWaiting = computed(() => !form.email || !form.password);
+const isWaiting = computed(
+  () => !form.name || !form.email || !form.password
+);
 
 const submit = async () => {
   if (isWaiting.value) return;
@@ -26,11 +29,10 @@ const submit = async () => {
   isLoading.value = true;
 
   try {
-    await Login(form.email, form.password);
-
-    router.push("/admin");
+    await Register(form.name, form.email, form.password);
+    
   } catch (err: any) {
-    error.value = err.message || "Erreur de connexion";
+    error.value = err.message || "Erreur lors de l'inscription";
   } finally {
     isLoading.value = false;
   }
@@ -40,12 +42,18 @@ const submit = async () => {
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <h2>Connexion</h2>
-      <p class="subtitle">Accède à ton espace Nexhub</p>
+      <h2>Créer un compte</h2>
+      <p class="subtitle">Rejoins Nexhub dès maintenant</p>
 
       <Message v-if="error" severity="error" class="mb-4">
         {{ error }}
       </Message>
+
+      <InputText
+        v-model="form.name"
+        placeholder="Nom d'utilisateur"
+        class="input"
+      />
 
       <InputText
         v-model="form.email"
@@ -57,12 +65,11 @@ const submit = async () => {
         v-model="form.password"
         placeholder="Mot de passe"
         toggleMask
-        :feedback="false"
         class="input"
       />
 
       <Button
-        label="Se connecter"
+        label="Créer le compte"
         class="btn-primary"
         :loading="isLoading"
         :disabled="isWaiting"
@@ -70,8 +77,8 @@ const submit = async () => {
       />
 
       <p class="switch">
-        Pas encore de compte ?
-        <router-link to="/register">Créer un compte</router-link>
+        Déjà un compte ?
+        <router-link to="/login">Se connecter</router-link>
       </p>
     </div>
   </div>
@@ -139,4 +146,5 @@ h2 {
   font-weight: 600;
   text-decoration: none;
 }
+
 </style>

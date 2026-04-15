@@ -18,12 +18,11 @@ export type PasswordWithId = Password & {
  * 🔐 Ajouter un mot de passe
  */
 export async function addPassword(data: Password): Promise<PasswordWithId> {
-  const user = await getUser();
-  const userId = user?.id;
 
-  if (!userId) throw new Error("Utilisateur non connecté");
 
-  const res = await fetch(`${API_URL}/password/${userId}`, {
+ 
+
+  const res = await fetch(`${API_URL}/password/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials:"include",
@@ -42,12 +41,8 @@ export async function addPassword(data: Password): Promise<PasswordWithId> {
  * 📥 Récupérer tous les mots de passe
  */
 export async function getAllPasswords(): Promise<PasswordWithId[]> {
-  const user = await getUser();
-  const userId = user?.id;
 
-  if (!userId) throw new Error("Utilisateur non connecté");
-
-  const res = await fetch(`${API_URL}/password/user/${userId}`,{
+  const res = await fetch(`${API_URL}/password/user/`,{
     credentials:"include"
   });
 

@@ -1,6 +1,7 @@
 <script>
 import { useRouter } from 'vue-router';
 
+
 const router = useRouter(); // <- indispensable
 
 </script>

@@ -1,13 +1,11 @@
-  import {useRouter} from "vue-router";
   // @ts-ignore
+  
   const API_URL = import.meta.env.VITE_API_URL;
+  import { User } from '../Interface/User';
+import { useUserStore } from './store';
 
-  const router = useRouter();
-  export type User={
-    username: string,
-    email: string,
-    role: string,
-  }
+
+
 
     /**
    * Connecte  l'utilsateur 
@@ -25,7 +23,7 @@
         headers: {
           "Content-Type": "application/json",
         },
-
+        credentials: "include", // CRUCIAL : Sans cette ligne, le navigateur n'envoie JAMAIS les cookies
         body: JSON.stringify({ email, password }),
       });
 
@@ -33,6 +31,12 @@
         throw new Error("Login failed");
       }
 
+      const data = await response.json();
+
+      // Mettre à jour le store avec les données de l'utilisateur
+      //const userStore = useUserStore();
+      //userStore.setUser(data.user); // Assurez-vous que data.user contient les bonnes informations
+      
       console .log("Login successful");
 
     } catch (error) {
@@ -65,7 +69,6 @@
       if (!response.ok) {
         throw new Error(data.error || "Registration failed");
       }
-      console.log(getUser());
       return await Login(email, password);
     } catch (error) {
       console.error("Register error:", error);
@@ -88,36 +91,34 @@
         if (!response.ok) {
           throw new Error("Logout failed");
         }
+        useUserStore().clearUser();
         
-
     } catch (error) {
       console.error("Logout error:", error);
     }
   }
 
+export const getUser = async () => {
+  try {
+    const response = await fetch("http://localhost:3000/auth/me", {
+      method: "GET",
+      // CRUCIAL : Sans cette ligne, le navigateur n'envoie JAMAIS les cookies
+      credentials: "include", 
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      }
+    });
 
-  /**
-   *Renvoie l'utisateur actuel
-   */
-  export async function getUser() {
-        try{
-          const response =await fetch(API_URL+ "/auth/me",{
-            credentials: "include",
-            method: "GET",
-          })
+    if (response.status === 401) return null;
+    if (!response.ok) throw new Error("Erreur serveur");
 
-          if (!response.ok) {
-            throw new Error("Failed to fetch user");
-          }
-
-          const user :User= await response.json();
-
-
-          return user;
-        }catch(error){
-          console.error("Getting user");
-        }
+    return await response.json();
+  } catch (err) {
+    console.error("Erreur getUser:", err);
+    return null;
   }
+};
 
   /**
    * Supprime le compte de l'utilisateur actuel
@@ -133,9 +134,7 @@
         throw new Error("Failed to delete user");
       }
 
-      await Logout().then(() => {
-        router.push("/login");
-      });
+      await Logout()
 
 
       console.log("User deleted successfully");

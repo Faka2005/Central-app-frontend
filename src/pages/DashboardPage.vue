@@ -12,7 +12,7 @@
 
         <Button
           icon="pi pi-sign-out"
-          @click="Logout"
+          @click="logout"
           class="logout-btn"
           label="Déconnexion"
         />
@@ -63,13 +63,18 @@
 import { ref } from "vue";
 import Button from "primevue/button";
 import ProgressBar from "primevue/progressbar";
-import Logout,{ getUser } from "../utils/auth";
-
+import Logout from "../utils/auth";
+import { useUserStore } from "../utils/store";
+import { useRouter } from "vue-router";
+const userStore = useUserStore();
+const router = useRouter();
 const user = ref({
-  username: getUser()?.username || "Utilisateur"
+  username: userStore.user?.username || "Utilisateur"
 });
-
-const progress = ref(65);
+const logout = async () => {
+  await Logout();
+  router.push({ name: "Home" });
+};
 </script>
 
 <style scoped>

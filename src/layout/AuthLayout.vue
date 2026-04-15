@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { onMounted } from 'vue'
-import { getUser } from '../utils/auth'
 import NavbarAuth from '../components/NavbarAuth.vue'
 
-const router = useRouter()
-const user = getUser()
 
-//onMounted(() => {
-//  if (!user || user.role === "") {
-//    router.push({ name: 'Login' })
-//  }
-//})
+
+
+
 </script>
 
 <template>

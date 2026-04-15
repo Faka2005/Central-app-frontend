@@ -5,12 +5,12 @@ import InputText from "primevue/inputtext";
 import Password from "primevue/password";
 import Button from "primevue/button";
 import Message from "primevue/message";
-import { Register } from "../utils/auth";
-
+import { Login} from "../../utils/auth";
+import { useUserStore } from "../../utils/store";
+import { getUser } from "../../utils/auth";
 const router = useRouter();
 
 const form = reactive({
-  name: "",
   email: "",
   password: "",
 });
@@ -18,21 +18,40 @@ const form = reactive({
 const error = ref("");
 const isLoading = ref(false);
 
-const isWaiting = computed(
-  () => !form.name || !form.email || !form.password
-);
+const isWaiting = computed(() => !form.email || !form.password);
 
 const submit = async () => {
   if (isWaiting.value) return;
 
   error.value = "";
   isLoading.value = true;
+  const userStore = useUserStore();
 
   try {
-    await Register(form.name, form.email, form.password);
-    
+    // 1. Connexion
+    await Login(form.email, form.password);
+
+    // 2. Récupération (Si le cookie est bien mis, ça renvoie l'user)
+    const user = await getUser();
+
+    if (!user) {
+      throw new Error("Session invalide ou cookie bloqué par le navigateur.");
+    }
+
+    // 3. IMPORTANT : Remplir le store pour que le Router Guard soit content
+    userStore.setUser(user);
+
+    // 4. Redirection
+    const role = user.role?.toLowerCase();
+    if (role === 'admin') {
+      router.push({ name: 'AdminDashboard' });
+    } else {
+      router.push({ name: 'Dashboard' });
+    }
+
   } catch (err: any) {
-    error.value = err.message || "Erreur lors de l'inscription";
+    error.value = err.message || "Identifiants invalides";
+    console.error("Login failed:", err);
   } finally {
     isLoading.value = false;
   }
@@ -42,18 +61,12 @@ const submit = async () => {
 <template>
   <div class="auth-page">
     <div class="auth-card">
-      <h2>Créer un compte</h2>
-      <p class="subtitle">Rejoins Nexhub dès maintenant</p>
+      <h2>Connexion</h2>
+      <p class="subtitle">Accède à ton espace Nexhub</p>
 
       <Message v-if="error" severity="error" class="mb-4">
         {{ error }}
       </Message>
-
-      <InputText
-        v-model="form.name"
-        placeholder="Nom d'utilisateur"
-        class="input"
-      />
 
       <InputText
         v-model="form.email"
@@ -65,11 +78,12 @@ const submit = async () => {
         v-model="form.password"
         placeholder="Mot de passe"
         toggleMask
+        :feedback="false"
         class="input"
       />
 
       <Button
-        label="Créer le compte"
+        label="Se connecter"
         class="btn-primary"
         :loading="isLoading"
         :disabled="isWaiting"
@@ -77,8 +91,8 @@ const submit = async () => {
       />
 
       <p class="switch">
-        Déjà un compte ?
-        <router-link to="/login">Se connecter</router-link>
+        Pas encore de compte ?
+        <router-link to="/register">Créer un compte</router-link>
       </p>
     </div>
   </div>
@@ -146,5 +160,4 @@ h2 {
   font-weight: 600;
   text-decoration: none;
 }
-
 </style>

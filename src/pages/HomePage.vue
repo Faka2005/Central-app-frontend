@@ -22,7 +22,7 @@
         <div v-if="loading">Chargement...</div>
         <div v-if="error" class="error">{{ error }}</div>
 
-        <div class="cards" v-if="services.length">
+        <div class="cards" v-if="services?.length">
           <div class="card" v-for="service in services" :key="service.name">
             <h3>{{ service.name }}</h3>
             <p>{{ service.description }}</p>
@@ -53,15 +53,16 @@
 <script setup lang="ts">
 
 import { ref, onMounted } from "vue";
-import axios from "axios";
 import { useRouter } from "vue-router";
-import { getUser } from "../utils/auth";
 
 interface Service {
+  id:number;
   name: string;
   description: string;
   link: string;
   etat: boolean;
+  createdAt: string;
+  updatedAt: string;
 }// @ts-ignore
 
 
@@ -72,18 +73,25 @@ const services = ref<Service[]>([]);
 const loading = ref(true);
 const error = ref("");
 
-const user = getUser();
-if (user && user.id) {
-  router.push("/app");
-}
 
 onMounted(async () => {
   try {
-    const res = await axios.get(`${API_URL}/services`);
-    services.value = res.data;
+    const res = await fetch(`${API_URL}/services`, {
+      method: "GET",
+      credentials: "include"
+    });
+    
+    const rawData = await res.json();
+    console.log("Données reçues :", rawData);
+
+    // Correction ici : si rawData est déjà un tableau, on le prend. 
+    // Sinon on cherche .data. Sinon tableau vide.
+    services.value = Array.isArray(rawData) ? rawData : (rawData.data || []);
+    
   } catch (err) {
-    console.error(err);
+    console.error("Erreur fetch services:", err);
     error.value = "Erreur lors du chargement des services.";
+    services.value = []; // Sécurité : on reste sur un tableau
   } finally {
     loading.value = false;
   }

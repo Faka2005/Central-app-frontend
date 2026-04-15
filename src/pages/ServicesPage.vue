@@ -51,7 +51,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const services = ref<Service[]>([]);
 
 onMounted(async () => {
-  const res = await axios.get(`${API_URL}/services`);
+  const res = await axios.get(`${API_URL}/services/`);
   services.value = res.data;
 });
 </script>
