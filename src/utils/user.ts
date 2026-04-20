@@ -1,6 +1,9 @@
+import { useUserStore } from "../store/store";
+
 // @ts-ignore
 const API_URL = import.meta.env.VITE_API_URL;
-export async function GetProfileByUser(userId:string){
+
+export async function GetProfileByUser(){
     try{
         const response = await fetch(`{API_URL}/users/me`, {
             method: "POST",
@@ -15,7 +18,7 @@ export async function GetProfileByUser(userId:string){
         if (!response.ok) {
             throw new Error(data.error || "Récupération du profile failed");
         }
-        sessionStorage.setItem("profile", JSON.stringify(data));
+        useUserStore().setProfile(data);
         return data;
     }catch(err){
         return err

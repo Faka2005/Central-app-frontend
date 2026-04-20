@@ -43,7 +43,11 @@ export async function addPassword(data: Password): Promise<PasswordWithId> {
 export async function getAllPasswords(): Promise<PasswordWithId[]> {
 
   const res = await fetch(`${API_URL}/password/user/`,{
-    credentials:"include"
+            credentials:"include",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
   });
 
   if (!res.ok) {
@@ -84,7 +88,11 @@ export async function deletePassword(id: string): Promise<void> {
 
   const res = await fetch(`${API_URL}/password/${id}`, {
     method: "DELETE",
-    credentials:"include",
+            credentials:"include",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
 
   });
 

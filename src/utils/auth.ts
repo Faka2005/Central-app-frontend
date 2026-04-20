@@ -2,7 +2,7 @@
   
   const API_URL = import.meta.env.VITE_API_URL;
   import { User } from '../Interface/User';
-import { useUserStore } from './store';
+import { useUserStore } from '../store/user';
 
 
 
@@ -84,6 +84,10 @@ import { useUserStore } from './store';
     try {
       const response =await fetch(`${API_URL}/auth/logout`, {
         credentials:"include",
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
         method: "POST",
       })
 

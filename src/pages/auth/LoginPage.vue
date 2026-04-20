@@ -6,8 +6,9 @@ import Password from "primevue/password";
 import Button from "primevue/button";
 import Message from "primevue/message";
 import { Login} from "../../utils/auth";
-import { useUserStore } from "../../utils/store";
+import { useUserStore } from "../../store/user";
 import { getUser } from "../../utils/auth";
+
 const router = useRouter();
 
 const form = reactive({

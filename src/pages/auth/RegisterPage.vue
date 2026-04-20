@@ -35,6 +35,7 @@ const submit = async () => {
     error.value = err.message || "Erreur lors de l'inscription";
   } finally {
     isLoading.value = false;
+    router.push({ name: 'Dashboard' });
   }
 };
 </script>

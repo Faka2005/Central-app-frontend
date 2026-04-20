@@ -54,8 +54,7 @@
 
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-
-interface Service {
+interface Service { 
   id:number;
   name: string;
   description: string;
@@ -82,7 +81,6 @@ onMounted(async () => {
     });
     
     const rawData = await res.json();
-    console.log("Données reçues :", rawData);
 
     // Correction ici : si rawData est déjà un tableau, on le prend. 
     // Sinon on cherche .data. Sinon tableau vide.
@@ -96,6 +94,7 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
 
 const scrollToServices = () => {
   const el = document.getElementById("services");

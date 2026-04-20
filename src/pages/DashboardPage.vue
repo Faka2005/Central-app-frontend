@@ -64,7 +64,7 @@ import { ref } from "vue";
 import Button from "primevue/button";
 import ProgressBar from "primevue/progressbar";
 import Logout from "../utils/auth";
-import { useUserStore } from "../utils/store";
+import { useUserStore } from "../store/user";
 import { useRouter } from "vue-router";
 const userStore = useUserStore();
 const router = useRouter();

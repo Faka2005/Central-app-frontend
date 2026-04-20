@@ -18,12 +18,12 @@
 
   // User
   import DashboardPage from "../pages/DashboardPage.vue";
-  import PasswordPage from "../components/PasswordPage.vue";
+  import PasswordPage from "../pages/PasswordPage.vue";
   // Admin
   import AdminDashboard from "../pages/admin/AdminDashboard.vue";
   import AdminServicePage from "../pages/admin/AdminServicePage.vue";
   import AdminUsers from "../pages/admin/AdminUsers.vue";
-  import { useUserStore } from "../utils/store";
+  import { useUserStore } from "../store/user";
   import { getUser } from "../utils/auth";
 
   const routes = [
