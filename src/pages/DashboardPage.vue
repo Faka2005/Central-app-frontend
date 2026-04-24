@@ -37,7 +37,7 @@
           </div>
           <h3>Coffre sécurisé</h3>
           <p>Stockez vos identifiants et mots de passe en toute sécurité.</p>
-          <Button label="Accéder" class="p-button-sm action-btn" />
+          <Button label="Accéder" @click="() => router.push({ name: 'PasswordPage' })" class="p-button-sm action-btn" />
         </div>
 
        

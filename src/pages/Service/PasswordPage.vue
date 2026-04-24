@@ -87,7 +87,7 @@ import {
   getAllPasswords,
   deletePassword,
   type Password
-} from "../utils/password"
+} from "../../utils/password"
 
 const passwords = ref<(Password & { id: string })[]>([])
 const loading = ref(true)
